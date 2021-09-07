@@ -13,7 +13,9 @@ import matplotlib.pyplot as plt
 
 
 def tridiagonal_matrix_solver(A, B):
-    """Solve a A * X = B tridiagonal matrix problem using Thomas algorithm, see https://en.wikipedia.org/wiki/Tridiagonal_matrix_algorithm and https://www.cfd-online.com/Wiki/Tridiagonal_matrix_algorithm_-_TDMA_%28Thomas_algorithm%29 for details.
+    """Solve a A * X = B tridiagonal matrix problem using Thomas algorithm.
+
+    See https://en.wikipedia.org/wiki/Tridiagonal_matrix_algorithm and https://www.cfd-online.com/Wiki/Tridiagonal_matrix_algorithm_-_TDMA_%28Thomas_algorithm%29 for details.
 
     Keywords arguments :
     A -- the (N * 3) shaped tridiagonal matrix containing each coefficient.
@@ -30,23 +32,20 @@ def tridiagonal_matrix_solver(A, B):
     d = B[:]
 
     # Computing new coefficients
-    cp = np.zeros(N)
-    dp = np.zeros(N)
-    cp[0] = c[0] / b[0]
-    dp[0] = d[0] / b[0]
     for i in range(1, N):
-        cp[i] = c[i] / (b[i] - a[i] * cp[i - 1])
-        dp[i] = (d[i] - a[i] * dp[i - 1]) / (b[i] - a[i] * cp[i - 1])
+        m = a[i] / b[i - 1]
+        b[i] -= m * c[i - 1]
+        d[i] -= m * d[i - 1]
     # Backward substitution
-    X[-1] = dp[-1]
+    X[-1] = d[-1] / b[-1]
     for i in range(N - 2, -1, -1):
-        X[i] = dp[i] - cp[i] * X[i + 1]
+        X[i] = (d[i] - c[i] * X[i + 1]) / b[i]
 
     return X
 
 
 def compact_diff(u):
-    """Compute th derivative of a singal u using compact finite difference method."""
+    """Compute the derivative of a signal u using compact finite difference method."""
     N = len(u)
     dx = u[1] - u[0]
     a = 1 / 6
@@ -63,6 +62,7 @@ def compact_diff(u):
     B[-1] = -u[-2]
     for i in range(1, N - 1):
         B[i] = B[i + 1] - B[i - 1]
+
     B = B / (2 * dx)
 
     V = tridiagonal_matrix_solver(A, B)
@@ -85,13 +85,14 @@ def diff(u, dx):
 
 
 if __name__ == '__main__':
-    # Creating x axis and signal to derivate
-    x = np.linspace(0, 2 * np.pi, 100)
+
+    # Computing x axis and signal to derivate
+    x = np.linspace(0, 2 * np.pi, 10)
     dx = x[1] - x[0]
     u = np.sin(x)
     N = len(u)
 
-    # Derivating the signal using FD method
+    # Derivation using finite differences
     du = np.zeros(N)
     du[0] = du[-1] = 1
     du[1:-1] = diff(u, dx)
@@ -99,7 +100,7 @@ if __name__ == '__main__':
     # Derivation using compact finite differences
     du_compact = compact_diff(u)
 
-    # Plotting stuff
+    # Plotting some stuff
     fig, ax = plt.subplots()
     ax.plot(x, np.cos(x), label="True derivative")
     ax.plot(x, du, label="First order finite difference")
