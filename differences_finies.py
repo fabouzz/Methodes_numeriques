@@ -87,7 +87,7 @@ def diff(u, dx):
 if __name__ == '__main__':
 
     # Computing x axis and signal to derivate
-    x = np.linspace(0, 2 * np.pi, 10)
+    x = np.linspace(0, 2 * np.pi, 100)
     dx = x[1] - x[0]
     u = np.sin(x)
     N = len(u)
@@ -108,4 +108,4 @@ if __name__ == '__main__':
     ax.set_xlabel("x")
     ax.grid()
     ax.legend()
-    plt.show()
+    plt.savefig('finite_differences.pdf')
