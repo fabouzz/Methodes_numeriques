@@ -50,12 +50,11 @@ def compact_diff(u):
     """Compute the derivative of a signal u using compact finite difference method."""
     N = len(u)
     dx = u[1] - u[0]
-    a = 1 / 6
-    b = 2 / 3
     # Computing the tridiagonal matrix
     A = np.zeros((N, 3))
-    A[:, 0] = A[:, -1] = a
-    A[:, 1] = b
+    A[:, 0] = A[:, -1] = 1 / 6
+    A[:, 1] = 2 / 3
+    A[0, 0] = A[-1, -1] = 0
 
     # Computing the second member
     B = np.zeros(N)
@@ -94,9 +93,9 @@ def diff(u, dx):
 if __name__ == '__main__':
 
     # # Testing the tridiagonal matrix solver
-    A = np.array([[10, 2, 0, 0], [3, 10, 4, 0], [0, 1, 7, 5], [0, 0, 3, 4]], dtype=float)
+    A = np.array([[1, 2, 0, 0], [3, 10, 4, 0], [0, 1, 7, 5], [0, 0, 3, 4]], dtype=float)
     a = np.array([0, 3, 1, 3], dtype=float)
-    b = np.array([10, 10, 7, 4], dtype=float)
+    b = np.array([1, 10, 7, 4], dtype=float)
     c = np.array([2, 4, 5, 0], dtype=float)
     d = np.array([3, 4, 5, 6.], dtype=float)
     AA = np.array([a, b, c]).T
@@ -119,11 +118,11 @@ if __name__ == '__main__':
 
     # Plotting some stuff
     fig, ax = plt.subplots()
-    ax.plot(x, np.cos(x), label="True derivative")
+    ax.plot(x, -np.sin(x), label="True derivative")
     ax.plot(x[1:-1], du, label="First order finite difference")
     ax.plot(x, du_compact, label="Compact finite difference")
     ax.set_xlabel("x")
     ax.grid()
     ax.legend()
     plt.show()
-    # plt.savefig('compact_FD_x_squared.pdf')
+    # plt.savefig('conditions_limites.pdf')
