@@ -85,17 +85,21 @@ def diff(u, dx):
 
 
 if __name__ == '__main__':
+    # Creating x axis and signal to derivate
     x = np.linspace(0, 2 * np.pi, 100)
     dx = x[1] - x[0]
     u = np.sin(x)
     N = len(u)
 
+    # Derivating the signal using FD method
     du = np.zeros(N)
     du[0] = du[-1] = 1
     du[1:-1] = diff(u, dx)
 
+    # Derivation using compact finite differences
     du_compact = compact_diff(u)
 
+    # Plotting stuff
     fig, ax = plt.subplots()
     ax.plot(x, np.cos(x), label="True derivative")
     ax.plot(x, du, label="First order finite difference")
