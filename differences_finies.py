@@ -34,12 +34,14 @@ def tridiagonal_matrix_solver(A, B):
     # Computing new coefficients
     for i in range(1, N):
         m = a[i] / b[i - 1]
-        b[i] -= m * c[i - 1]
-        d[i] -= m * d[i - 1]
+        b[i] = b[i] - m * c[i - 1]
+        d[i] = d[i] - m * d[i - 1]
+
     # Backward substitution
+    # X = b
     X[-1] = d[-1] / b[-1]
-    for i in range(N - 2, -1, -1):
-        X[i] = (d[i] - c[i] * X[i + 1]) / b[i]
+    for j in range(N - 2, -1, -1):
+        X[j] = (d[j] - c[j] * X[j + 1]) / b[j]
 
     return X
 
@@ -54,7 +56,6 @@ def compact_diff(u):
     A = np.zeros((N, 3))
     A[:, 0] = A[:, -1] = a
     A[:, 1] = b
-    A[0, 0] = A[-1, -1] = 0
 
     # Computing the second member
     B = np.zeros(N)
@@ -64,6 +65,12 @@ def compact_diff(u):
         B[i] = B[i + 1] - B[i - 1]
 
     B = B / (2 * dx)
+
+    # Adding boundary conditions
+    # A[0, :] = A[-1, :] = 0
+    # A[0, 1] = A[-1, -2] = 1
+    # B[0] = 1
+    # B[-1] = 1
 
     V = tridiagonal_matrix_solver(A, B)
     return V
@@ -86,16 +93,26 @@ def diff(u, dx):
 
 if __name__ == '__main__':
 
+    # # Testing the tridiagonal matrix solver
+    A = np.array([[10, 2, 0, 0], [3, 10, 4, 0], [0, 1, 7, 5], [0, 0, 3, 4]], dtype=float)
+    a = np.array([0, 3, 1, 3], dtype=float)
+    b = np.array([10, 10, 7, 4], dtype=float)
+    c = np.array([2, 4, 5, 0], dtype=float)
+    d = np.array([3, 4, 5, 6.], dtype=float)
+    AA = np.array([a, b, c]).T
+    if np.allclose(np.linalg.solve(A, d), tridiagonal_matrix_solver(AA, d)):
+        print("Function 'tridiagonal_matrix_solver' ok !")
+
     # Computing x axis and signal to derivate
     x = np.linspace(0, 2 * np.pi, 100)
     dx = x[1] - x[0]
-    u = np.sin(x)
+    u = np.cos(x)
     N = len(u)
 
     # Derivation using finite differences
-    du = np.zeros(N)
-    du[0] = du[-1] = 1
-    du[1:-1] = diff(u, dx)
+    # du = np.zeros(N)
+    # du[0] = du[-1] = 1
+    du = diff(u, dx)
 
     # Derivation using compact finite differences
     du_compact = compact_diff(u)
@@ -103,9 +120,10 @@ if __name__ == '__main__':
     # Plotting some stuff
     fig, ax = plt.subplots()
     ax.plot(x, np.cos(x), label="True derivative")
-    ax.plot(x, du, label="First order finite difference")
+    ax.plot(x[1:-1], du, label="First order finite difference")
     ax.plot(x, du_compact, label="Compact finite difference")
     ax.set_xlabel("x")
     ax.grid()
     ax.legend()
-    plt.savefig('finite_differences.pdf')
+    plt.show()
+    # plt.savefig('compact_FD_x_squared.pdf')
